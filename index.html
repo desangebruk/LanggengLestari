@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pendaftaran Pelanggan</title>
+</head>
+<body>
+  <h2>Pendaftaran Pelanggan</h2>
+  <form id="registerForm">
+    <input type="text" id="nama" placeholder="Nama" required><br>
+    <input type="email" id="email" placeholder="Email" required><br>
+    <input type="text" id="telepon" placeholder="Nomor Telepon" required><br>
+    <input type="date" id="tanggal" required><br>
+    <input type="number" id="tagihan" placeholder="Tagihan Tersisa" required><br>
+    <input type="text" id="alamat" placeholder="Alamat" required><br>
+    <input type="text" id="blok" placeholder="Blok" required><br>
+    <select id="tipe" required>
+      <option value="">Pilih Tipe</option>
+      <option value="Rumah Tangga">Rumah Tangga</option>
+      <option value="Usaha">Usaha</option>
+    </select><br>
+    <button type="submit">Daftar</button>
+  </form>
+
+  <script>
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbwri-uZChRpUBtE8ac-Lz7KoNZvCkORFVRt0ptY3ug1mERjKoOTfogwYV5PGPsPu-IpGg/exec'; // Ganti dengan URL Web App Google Apps Script
+
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const nama = document.getElementById('nama').value;
+      const email = document.getElementById('email').value;
+      const telepon = document.getElementById('telepon').value;
+      const tanggal = document.getElementById('tanggal').value;
+      const tagihan = document.getElementById('tagihan').value;
+      const alamat = document.getElementById('alamat').value;
+      const blok = document.getElementById('blok').value;
+      const tipe = document.getElementById('tipe').value;
+
+      fetch(scriptUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({action: 'add', nama, email, telepon, tanggal, tagihan, alamat, blok, tipe})
+      }).then(() => {
+        alert('Pendaftaran berhasil!');
+        document.getElementById('registerForm').reset();
+      });
+    });
+  </script>
+</body>
+</html>
