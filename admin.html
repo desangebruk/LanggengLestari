@@ -1,90 +1,97 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>Admin - Data Pelanggan</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Halaman Admin - Langgeng Lestari</title>
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f9f4;
+        margin: 0;
+        padding: 20px;
+    }
+    h2 {
+        text-align: center;
+        color: #388e3c;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #e0e0e0;
+    }
+    button {
+        margin-top: 20px;
+        padding: 10px 15px;
+        background-color: #d32f2f;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #b71c1c;
+    }
+</style>
 </head>
 <body>
-  <h2>Login Admin</h2>
-  <input type="password" id="password" placeholder="Password"><br>
-  <button onclick="login()">Login</button>
+<h2>Data Pendaftaran</h2>
+<div id="dataContainer">Memuat data...</div>
+<button onclick="logout()">Logout</button>
 
-  <div id="adminSection" style="display:none;">
-    <h3>Data Pelanggan</h3>
-    <button onclick="loadData()">Lihat Data</button>
-    <div id="dataContainer"></div>
-  </div>
+<script>
+    // URL API Google Apps Script
+    const getDataUrl = 'https://script.google.com/macros/s/AKfycbwri-uZChRpUBtE8ac-Lz7KoNZvCkORFVRt0ptY3ug1mERjKoOTfogwYV5PGPsPu-IpGg/exec'; // Ganti dengan URL GET data
+    const saveDataUrl = 'https://script.google.com/macros/s/AKfycbwri-uZChRpUBtE8ac-Lz7KoNZvCkORFVRt0ptY3ug1mERjKoOTfogwYV5PGPsPu-IpGg/exec'; // Ganti dengan URL POST data
 
-  <script>
-    const scriptUrl = 'https://script.google.com/macros/s/AKfycbwri-uZChRpUBtE8ac-Lz7KoNZvCkORFVRt0ptY3ug1mERjKoOTfogwYV5PGPsPu-IpGg/exec'; // Ganti dengan URL Web App
-
-    function login() {
-      const password = document.getElementById('password').value;
-      if (password === 'admin123') {
-        document.getElementById('adminSection').style.display = 'block';
-      } else {
-        alert('Password salah');
-      }
+    // Cek login
+    if (localStorage.getItem('adminLoggedIn') !== 'true') {
+        window.location.href = 'admin_login.html';
     }
 
-    function loadData() {
-      fetch(`https://script.google.com/macros/s/AKfycbwri-uZChRpUBtE8ac-Lz7KoNZvCkORFVRt0ptY3ug1mERjKoOTfogwYV5PGPsPu-IpGg/exec?action=get`)
-        .then(res => res.json())
-        .then(data => {
-          const container = document.getElementById('dataContainer');
-          container.innerHTML = '';
-          data.forEach(row => {
-            if (row[0]) {
-              const id = row[0];
-              const nama = row[1];
-              const email = row[2];
-              const telepon = row[3];
-              const alamat = row[4];
-              const blok = row[5];
-              const tipe = row[6];
-              const status = row[7];
-              const tagihan = row[8];
-              const tanggal = row[9];
+    // Fungsi logout
+    function logout() {
+        localStorage.removeItem('adminLoggedIn');
+        window.location.href = 'admin_login.html';
+    }
 
-              const div = document.createElement('div');
-              div.innerHTML = `
-                <p>ID: ${id}</p>
-                <p>Nama: ${nama}</p>
-                <p>Email: ${email}</p>
-                <p>Telepon: ${telepon}</p>
-                <p>Alamat: <input type="text" onchange="updateCustomer('${id}', 'alamat', this.value)" value="${alamat}"></p>
-                <p>Blok: <input type="text" onchange="updateCustomer('${id}', 'blok', this.value)" value="${blok}"></p>
-                <p>Tipe: 
-                  <select onchange="updateCustomer('${id}', 'tipe', this.value)">
-                    <option value="Rumah Tangga" ${tipe==='Rumah Tangga'?'selected':''}>Rumah Tangga</option>
-                    <option value="Usaha" ${tipe==='Usaha'?'selected':''}>Usaha</option>
-                  </select>
-                </p>
-                <p>Status Pembayaran: <input type="text" onchange="updateCustomer('${id}', 'statusPembayaran', this.value)" value="${status}"></p>
-                <p>Tagihan Tersisa: <input type="number" onchange="updateCustomer('${id}', 'tagihanTersisa', this.value)" value="${tagihan}"></p>
-                <hr>
-              `;
-              container.appendChild(div);
-            }
-          });
+    // Fungsi untuk ambil data dari Google Sheets
+    function fetchData() {
+        fetch(getDataUrl)
+            .then(res => res.json())
+            .then(data => {
+                tampilkanData(data);
+            })
+            .catch(error => {
+                document.getElementById('dataContainer').innerHTML = 'Gagal memuat data.';
+                console.error('Error:', error);
+            });
+    }
+
+    // Fungsi untuk tampilkan data ke tabel
+    function tampilkanData(data) {
+        if (!data || data.length === 0) {
+            document.getElementById('dataContainer').innerHTML = 'Tidak ada data.';
+            return;
+        }
+        let html = '<table><tr><th>Nama</th><th>Email</th><th>Nomor HP</th></tr>';
+        data.forEach(row => {
+            html += `<tr><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td></tr>`;
         });
+        html += '</table>';
+        document.getElementById('dataContainer').innerHTML = html;
     }
 
-    function updateCustomer(id, field, value) {
-      const updateData = {};
-      if (field === 'statusPembayaran') {
-        updateData.statusPembayaran = value;
-      } else if (field === 'tagihanTersisa') {
-        updateData.tagihanTersisa = value;
-      } else if (field === 'alamat' || field === 'blok' || field === 'tipe') {
-        updateData[field] = value;
-      }
-      fetch('https://script.google.com/macros/s/AKfycbwri-uZChRpUBtE8ac-Lz7KoNZvCkORFVRt0ptY3ug1mERjKoOTfogwYV5PGPsPu-IpGg/exec', {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({action: 'update', id, updateData})
-      });
-    }
-  </script>
+    // Panggil fetchData saat halaman dimuat
+    window.onload = fetchData;
+</script>
 </body>
 </html>
