@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Data Pelanggan</title>
+</head>
+<body>
+  <h2>Login Admin</h2>
+  <input type="password" id="password" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+
+  <div id="adminSection" style="display:none;">
+    <h3>Data Pelanggan</h3>
+    <button onclick="loadData()">Lihat Data</button>
+    <div id="dataContainer"></div>
+  </div>
+
+  <script>
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbwri-uZChRpUBtE8ac-Lz7KoNZvCkORFVRt0ptY3ug1mERjKoOTfogwYV5PGPsPu-IpGg/exec'; // Ganti dengan URL Web App
+
+    function login() {
+      const password = document.getElementById('password').value;
+      if (password === 'admin123') {
+        document.getElementById('adminSection').style.display = 'block';
+      } else {
+        alert('Password salah');
+      }
+    }
+
+    function loadData() {
+      fetch(`https://script.google.com/macros/s/AKfycbwri-uZChRpUBtE8ac-Lz7KoNZvCkORFVRt0ptY3ug1mERjKoOTfogwYV5PGPsPu-IpGg/exec?action=get`)
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById('dataContainer');
+          container.innerHTML = '';
+          data.forEach(row => {
+            if (row[0]) {
+              const id = row[0];
+              const nama = row[1];
+              const email = row[2];
+              const telepon = row[3];
+              const alamat = row[4];
+              const blok = row[5];
+              const tipe = row[6];
+              const status = row[7];
+              const tagihan = row[8];
+              const tanggal = row[9];
+
+              const div = document.createElement('div');
+              div.innerHTML = `
+                <p>ID: ${id}</p>
+                <p>Nama: ${nama}</p>
+                <p>Email: ${email}</p>
+                <p>Telepon: ${telepon}</p>
+                <p>Alamat: <input type="text" onchange="updateCustomer('${id}', 'alamat', this.value)" value="${alamat}"></p>
+                <p>Blok: <input type="text" onchange="updateCustomer('${id}', 'blok', this.value)" value="${blok}"></p>
+                <p>Tipe: 
+                  <select onchange="updateCustomer('${id}', 'tipe', this.value)">
+                    <option value="Rumah Tangga" ${tipe==='Rumah Tangga'?'selected':''}>Rumah Tangga</option>
+                    <option value="Usaha" ${tipe==='Usaha'?'selected':''}>Usaha</option>
+                  </select>
+                </p>
+                <p>Status Pembayaran: <input type="text" onchange="updateCustomer('${id}', 'statusPembayaran', this.value)" value="${status}"></p>
+                <p>Tagihan Tersisa: <input type="number" onchange="updateCustomer('${id}', 'tagihanTersisa', this.value)" value="${tagihan}"></p>
+                <hr>
+              `;
+              container.appendChild(div);
+            }
+          });
+        });
+    }
+
+    function updateCustomer(id, field, value) {
+      const updateData = {};
+      if (field === 'statusPembayaran') {
+        updateData.statusPembayaran = value;
+      } else if (field === 'tagihanTersisa') {
+        updateData.tagihanTersisa = value;
+      } else if (field === 'alamat' || field === 'blok' || field === 'tipe') {
+        updateData[field] = value;
+      }
+      fetch('https://script.google.com/macros/s/AKfycbwri-uZChRpUBtE8ac-Lz7KoNZvCkORFVRt0ptY3ug1mERjKoOTfogwYV5PGPsPu-IpGg/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: 'update', id, updateData})
+      });
+    }
+  </script>
+</body>
+</html>
